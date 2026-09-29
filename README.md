@@ -27,7 +27,7 @@ The service worker needs `http://localhost` or HTTPS; opening `index.html` as a 
 
 Push to GitHub, then go to Settings → Pages → Deploy from a branch → `main` / root. There's no build step.
 
-The service worker serves the cached copy first and refreshes it in the background, so installed apps pick up a new deploy on the next launch. If you add, rename or remove files, list them in `FILES` in `sw.js` and bump `VERSION`.
+**On every deploy, bump `VERSION` in `sw.js`.** The changed service worker makes installed apps reload into the new version as soon as they're opened or brought back to the foreground. App files are fetched from the network first, with the cached copy used offline or after 3 seconds, so even without the bump a fresh launch shows the new version. New or renamed files also need to be listed in `FILES` in `sw.js`.
 
 ## Regenerating the data
 

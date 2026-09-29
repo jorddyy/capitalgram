@@ -781,7 +781,19 @@
     showView(['learn', 'anagram', 'atlas'].includes(state.settings.tab) ? state.settings.tab : 'learn');
 
     if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
-      navigator.serviceWorker.register('sw.js').catch(() => { /* offline support unavailable */ });
+      // When a new deploy's service worker takes over, reload once to show it.
+      // Installed apps are often resumed rather than relaunched, so also look
+      // for an update whenever the app comes back to the foreground.
+      const hadController = !!navigator.serviceWorker.controller;
+      let reloading = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (hadController && !reloading) { reloading = true; location.reload(); }
+      });
+      navigator.serviceWorker.register('sw.js').then((reg) => {
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') reg.update().catch(() => {});
+        });
+      }).catch(() => { /* offline support unavailable */ });
     }
   }
 
