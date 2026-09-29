@@ -28,8 +28,8 @@
   // ---------- stored state
 
   const DEFAULT_SETTINGS = {
-    regions: CONTINENTS.slice(), direction: 'mixed', style: 'type', mapReveal: 'before',
-    anStyle: 'mixed', roundLen: 10, timer: 0, tab: 'learn', sv: 2,
+    regions: CONTINENTS.slice(), direction: 'cc', style: 'type', mapReveal: 'after',
+    anStyle: 'mixed', roundLen: 10, timer: 0, tab: 'learn', sv: 3,
   };
 
   let state = load();
@@ -39,8 +39,11 @@
       const s = JSON.parse(localStorage.getItem(STORE_KEY));
       if (s && typeof s === 'object') {
         const settings = { ...DEFAULT_SETTINGS, ...s.settings };
-        // v1 defaulted to multiple choice, which turned out too easy
-        if (!s.settings || !s.settings.sv) Object.assign(settings, { style: 'type', sv: 2 });
+        // Move older installs onto defaults that changed after release
+        const sv = (s.settings && s.settings.sv) || 1;
+        if (sv < 2) settings.style = 'type';
+        if (sv < 3) Object.assign(settings, { direction: 'cc', mapReveal: 'after' });
+        settings.sv = DEFAULT_SETTINGS.sv;
         return { settings, cards: s.cards || {} };
       }
     } catch (e) { /* storage unavailable or corrupt: start fresh */ }
