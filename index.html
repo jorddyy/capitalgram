@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Capitalgram</title>
+<meta name="description" content="Train world capitals and capital anagrams for the pub quiz.">
+<meta name="theme-color" content="#1d3340">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <header class="bar">
+    <h1 class="brand">Capital<span>gram</span></h1>
+    <nav class="tabs" role="tablist">
+      <button role="tab" id="tab-learn" data-view="learn" aria-selected="true">Learn</button>
+      <button role="tab" id="tab-anagram" data-view="anagram" aria-selected="false">Anagrams</button>
+      <button role="tab" id="tab-atlas" data-view="atlas" aria-selected="false">Atlas</button>
+    </nav>
+    <button class="icon-btn" id="open-settings" aria-label="Settings">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M19.4 13a7.6 7.6 0 0 0 0-2l2.1-1.6-2-3.5-2.5 1a7.7 7.7 0 0 0-1.7-1L15 3.3h-4l-.4 2.6a7.7 7.7 0 0 0-1.7 1l-2.5-1-2 3.5L6.6 11a7.6 7.6 0 0 0 0 2l-2.1 1.6 2 3.5 2.5-1c.5.4 1.1.7 1.7 1l.4 2.6h4l.4-2.6c.6-.3 1.2-.6 1.7-1l2.5 1 2-3.5zM13 15.5a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7z" transform="translate(-1 0)"/></svg>
+    </button>
+  </header>
+
+  <main>
+    <!-- Learn: flashcards with spaced repetition -->
+    <section class="view" id="view-learn">
+      <div class="card">
+        <div class="map-wrap"><svg class="map" id="learn-map" viewBox="0 0 400 280" role="img" aria-label="Map"></svg></div>
+        <div class="prompt">
+          <p class="eyebrow" id="learn-eyebrow"></p>
+          <p class="question" id="learn-question"></p>
+        </div>
+        <div class="answer" id="learn-answer"></div>
+        <div class="feedback" id="learn-feedback" hidden></div>
+      </div>
+      <p class="session" id="learn-session"></p>
+    </section>
+
+    <!-- Anagrams: rounds with hints -->
+    <section class="view" id="view-anagram" hidden>
+      <div class="card" id="an-card">
+        <div class="round-head">
+          <span id="an-progress"></span>
+          <span class="timer" id="an-timer" hidden></span>
+          <span id="an-score"></span>
+        </div>
+        <div class="tiles" id="an-tiles" aria-live="polite"></div>
+        <p class="letter-count" id="an-count"></p>
+        <div class="hints" id="an-hints"></div>
+        <div class="hint-out" id="an-hint-out"></div>
+        <div class="map-wrap" id="an-map-wrap" hidden><svg class="map" id="an-map" viewBox="0 0 400 280" role="img" aria-label="Map hint"></svg></div>
+        <form class="type-row" id="an-form" autocomplete="off">
+          <input id="an-input" type="text" autocapitalize="words" spellcheck="false" placeholder="Which capital?" aria-label="Your answer">
+          <button type="submit" class="btn primary">Check</button>
+        </form>
+        <p class="msg" id="an-msg" aria-live="polite"></p>
+        <div class="feedback" id="an-feedback" hidden></div>
+        <div class="round-foot">
+          <button type="button" class="btn ghost" id="an-giveup">Give up</button>
+          <button type="button" class="btn ghost" id="an-end">End round</button>
+        </div>
+      </div>
+      <div class="summary card" id="an-summary" hidden></div>
+    </section>
+
+    <!-- Atlas: browse everything, see mastery -->
+    <section class="view" id="view-atlas" hidden>
+      <div class="card atlas-map-card">
+        <div class="map-wrap"><svg class="map" id="atlas-map" viewBox="0 0 400 280" role="img" aria-label="Map"></svg></div>
+        <p class="atlas-caption" id="atlas-caption">Tap a country in the list to see it on the map.</p>
+      </div>
+      <div class="mastery" id="atlas-mastery"></div>
+      <input id="atlas-search" class="search" type="search" placeholder="Search country or capital" aria-label="Search country or capital">
+      <div id="atlas-list"></div>
+    </section>
+  </main>
+</div>
+
+<dialog id="settings">
+  <form method="dialog" class="settings">
+    <h2>Settings</h2>
+
+    <fieldset>
+      <legend>Regions</legend>
+      <div class="chips" id="set-regions"></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Learn</legend>
+      <label for="set-direction">Ask</label>
+      <select id="set-direction">
+        <option value="mixed">Both ways</option>
+        <option value="cc">Country → capital</option>
+        <option value="kc">Capital → country</option>
+      </select>
+      <label for="set-style">Answer by</label>
+      <select id="set-style">
+        <option value="choice">Picking from four</option>
+        <option value="type">Typing</option>
+        <option value="flip">Flipping the card</option>
+      </select>
+      <label for="set-mapreveal">Show the map</label>
+      <select id="set-mapreveal">
+        <option value="before">With the question</option>
+        <option value="after">After answering</option>
+      </select>
+    </fieldset>
+
+    <fieldset>
+      <legend>Anagrams</legend>
+      <label for="set-anstyle">Anagram style</label>
+      <select id="set-anstyle">
+        <option value="mixed">Mixed</option>
+        <option value="shuffle">Letter shuffle (NILREB)</option>
+        <option value="phrase">Words (PAIRS → Paris)</option>
+      </select>
+      <p class="help">117 of the 195 capitals have a word anagram; the others are shuffled.</p>
+      <label for="set-roundlen">Questions per round</label>
+      <select id="set-roundlen">
+        <option value="10">10</option>
+        <option value="20">20</option>
+        <option value="0">Endless</option>
+      </select>
+      <label for="set-timer">Time per question</label>
+      <select id="set-timer">
+        <option value="0">No timer</option>
+        <option value="60">60 seconds</option>
+        <option value="30">30 seconds</option>
+        <option value="15">15 seconds</option>
+      </select>
+    </fieldset>
+
+    <fieldset>
+      <legend>Backup</legend>
+      <p class="help">Your progress is stored only in this browser. Copy the backup code to keep it safe or move it to another device.</p>
+      <div class="row-btns">
+        <button type="button" class="btn" id="export-btn">Show backup code</button>
+        <button type="button" class="btn" id="copy-btn" hidden>Copy</button>
+      </div>
+      <label for="backup-code">Backup code</label>
+      <textarea id="backup-code" rows="3" spellcheck="false" placeholder="Paste a backup code here to restore it"></textarea>
+      <button type="button" class="btn" id="import-btn">Restore from code</button>
+      <p class="help" id="backup-msg" aria-live="polite"></p>
+    </fieldset>
+
+    <fieldset>
+      <legend>Progress</legend>
+      <button type="button" class="btn danger" id="reset-progress">Reset all progress</button>
+      <p class="help" id="reset-confirm" hidden>Tap again to confirm. This clears every card's history.</p>
+    </fieldset>
+
+    <button class="btn primary wide" value="close">Done</button>
+  </form>
+</dialog>
+
+<script src="vendor/d3-array.min.js"></script>
+<script src="vendor/d3-geo.min.js"></script>
+<script src="vendor/topojson-client.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
