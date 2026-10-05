@@ -3,7 +3,7 @@
 // cache otherwise, so a deploy shows up on the next launch while offline use
 // stays instant. Bump VERSION on every deploy: the changed sw.js is what makes
 // an already-open app reload itself (see app.js).
-const VERSION = 'v3';
+const VERSION = 'v4';
 const NETWORK_TIMEOUT = 3000;
 const CACHE = `capitalgram-${VERSION}`;
 const FONTS = 'capitalgram-fonts';

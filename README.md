@@ -3,7 +3,7 @@
 A small offline web app for learning world capitals and solving capital anagrams, built for pub-quiz practice. It covers 195 countries.
 
 - **Learn**: flashcards in both directions (country → capital, capital → country). Answer by typing, flipping the card, or (easier) picking from four. Every question shows a map of the region with the country highlighted. Spaced repetition brings back the ones you miss.
-- **Anagrams**: rounds of scrambled capitals, shown either as a plain letter shuffle (NILREB) or as real words (PAIRS → Paris). Hints (region map, country, word lengths, first letter) cost a point each. Optional timer.
+- **Anagrams**: rounds of scrambled capitals, shown either as a plain letter shuffle (NILREB) or as real words (PAIRS → Paris). Hints (region map, country, word lengths, first letter) cost a point each. Optional timer, and an optional minimum length (say 7+ letters) to match the quiz.
 - **Atlas**: browse every country and capital on the map, and see how much of each continent you've learned.
 
 Progress is stored only in the browser, in `localStorage`. Settings → Backup gives a code you can copy to keep it safe or move it to another device.

@@ -29,7 +29,7 @@
 
   const DEFAULT_SETTINGS = {
     regions: CONTINENTS.slice(), direction: 'cc', style: 'type', mapReveal: 'after',
-    anStyle: 'mixed', roundLen: 10, timer: 0, tab: 'learn', sv: 3,
+    anStyle: 'mixed', anMin: 0, roundLen: 10, timer: 0, tab: 'learn', sv: 3,
   };
 
   let state = load();
@@ -387,6 +387,20 @@
 
   // ---------- Anagrams
 
+  const anTarget = (c) => c.capital.split(',')[0]; // "Washington, D.C." -> Washington
+
+  function longEnough(ids) {
+    const min = +state.settings.anMin;
+    return ids.filter((id) => lettersOf(anTarget(BY_ID[id])).length >= min);
+  }
+
+  // If no capital in the chosen regions is long enough, use them all
+  function anagramPool() {
+    const pool = poolIds();
+    const long = longEnough(pool);
+    return long.length ? long : pool;
+  }
+
   const round = { len: 10, i: 0, answered: 0, score: 0, missed: [], asked: new Set(), q: null, timer: null, deadline: 0 };
 
   const HINTS = [
@@ -419,9 +433,9 @@
   function nextAnagram() {
     stopTimer();
     if (round.len && round.i >= round.len) return showSummary();
-    const id = pickCard('an', poolIds(), round.asked, Infinity);
+    const id = pickCard('an', anagramPool(), round.asked, Infinity);
     const c = BY_ID[id];
-    const target = c.capital.split(',')[0]; // "Washington, D.C." -> Washington
+    const target = anTarget(c);
     round.asked.add(id);
     round.i++;
     round.q = { id, target, scramble: makeScramble(c, target), hints: 0, hintText: [], done: false };
@@ -670,7 +684,7 @@
 
   const SELECTS = {
     'set-direction': 'direction', 'set-style': 'style', 'set-mapreveal': 'mapReveal',
-    'set-anstyle': 'anStyle', 'set-roundlen': 'roundLen', 'set-timer': 'timer',
+    'set-anstyle': 'anStyle', 'set-anmin': 'anMin', 'set-roundlen': 'roundLen', 'set-timer': 'timer',
   };
   const LEARN_KEYS = ['direction', 'style', 'mapReveal'];
   let changed = new Set();
@@ -679,10 +693,20 @@
     for (const [id, key] of Object.entries(SELECTS)) $(id).value = String(state.settings[key]);
     $('set-regions').innerHTML = CONTINENTS.map((r) =>
       `<button type="button" class="chip" data-r="${r}" aria-pressed="${state.settings.regions.includes(r)}">${r}</button>`).join('');
+    updateAnMinHelp();
     $('reset-confirm').hidden = true;
     $('backup-msg').textContent = '';
     $('copy-btn').hidden = true;
     $('backup-code').value = '';
+  }
+
+  function updateAnMinHelp() {
+    const min = +state.settings.anMin;
+    const pool = poolIds();
+    const n = longEnough(pool).length;
+    $('anmin-help').textContent = !min ? ''
+      : n ? `${n} of the ${pool.length} capitals in your regions have ${min} or more letters.`
+      : `No capital in your regions has ${min} or more letters, so all of them are used.`;
   }
 
   function initSettings() {
@@ -692,9 +716,10 @@
     for (const [id, key] of Object.entries(SELECTS)) {
       $(id).addEventListener('change', (e) => {
         const v = e.target.value;
-        state.settings[key] = ['roundLen', 'timer'].includes(key) ? +v : v;
+        state.settings[key] = ['anMin', 'roundLen', 'timer'].includes(key) ? +v : v;
         changed.add(key);
         save();
+        if (key === 'anMin') updateAnMinHelp();
       });
     }
 
@@ -710,6 +735,7 @@
       b.setAttribute('aria-pressed', String(regs.includes(r)));
       changed.add('regions');
       save();
+      updateAnMinHelp();
     });
 
     let resetArmed = null;
@@ -759,7 +785,7 @@
     dlg.addEventListener('close', () => {
       if (!changed.size) return;
       if (changed.has('regions') || changed.has('cards') || LEARN_KEYS.some((k) => changed.has(k))) nextLearn();
-      if (changed.has('regions') || changed.has('anStyle') || changed.has('roundLen') || changed.has('timer')) startRound();
+      if (changed.has('regions') || changed.has('anStyle') || changed.has('anMin') || changed.has('roundLen') || changed.has('timer')) startRound();
       if (!$('view-atlas').hidden) renderAtlas();
       changed = new Set();
     });
